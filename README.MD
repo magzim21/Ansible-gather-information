@@ -1,5 +1,5 @@
-# GATHER INFO FROM ALL HOSTS
-This Ansible role use useful for those freshmans who just came to project and not familiar with infrastructure etc.
+# GATHER VARIOUS INFORMATION FROM HOSTS
+### This Ansible role use useful for those freshmans who just came to project and not familiar with infrastructure etc.
 
 **Look closely to  ./my_role/tasks**
 You can exclude some plays by commenting out those ones in ./my_role/tasks/main.yml
