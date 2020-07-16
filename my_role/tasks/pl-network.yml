@@ -1,0 +1,39 @@
+---
+
+
+- name: Listing iptables --list-rules
+  shell: iptables --list-rules
+  register: iptables_rules
+
+- name: Listing route tables
+  ignore_errors: yes
+  shell: ss -nr
+  register: ss_nr
+
+- name: Listing network interfaces
+  ignore_errors: yes
+  shell: ss -ni
+  register: ss_ni
+
+- name: Listening ports
+  ignore_errors: yes
+  shell: ss -tulpn
+  register: ss_tulpn
+
+- name: checking for hardcoded resolving
+  ignore_errors: yes
+  shell: cat /etc/hosts ; cat /etc/resolv.conf
+  register: hosts_and_resolv
+
+
+
+- name: Create folder if not exists
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+- name: Saving network info to local files
+  local_action: copy force=yes content="###iptables_rules\n{{ iptables_rules['stdout'] }}\###ss -nr\n{{ ss_nr['stdout'] }}\n###ss -ni\n{{ ss_ni['stdout'] }}\n###ss -tulpn\n{{ ss_tulpn['stdout'] }}\n\n###cat /etc/hosts; cat /etc/resolv\n{{ hosts_and_resolv['stdout'] }}" dest="{{ save_path }}/{{ ansible_default_ipv4['address'] }}"

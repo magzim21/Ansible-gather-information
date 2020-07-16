@@ -1,0 +1,44 @@
+---
+
+- import_tasks: pl-network.yml
+  #ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/network"
+
+- import_tasks: pl-crontab.yml
+  #ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/cronjobs"
+
+- import_tasks: pl-last.yml
+  #ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/last"
+
+- import_tasks: pl-hardware.yml
+  #ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/hardware"
+
+# - import_tasks: pl-find-files.yml
+#   ignore_errors: yes
+#   vars:
+#     - save_path: "{{ base_dir }}/find_results"
+#     - save_path_full: "{{ base_dir }}/find_results_full"
+
+- import_tasks: pl-history.yml
+  ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/history"
+
+- import_tasks: pl-scan-pids.yml
+  ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/scanned_pids"
+
+- import_tasks: pl-scan-docker.yml
+  #ignore_errors: yes
+  vars:
+    - save_path: "{{ base_dir }}/docker_info"
+
+

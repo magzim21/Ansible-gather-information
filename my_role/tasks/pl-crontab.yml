@@ -1,0 +1,36 @@
+---
+# GET ALL CRONTAB TASKS
+- name: Listing cronjobs of all users
+  shell: >
+    for user in $(getent passwd | cut -f1 -d: ); do  output=`crontab -u $user -l 2>/dev/null` ; if [ $? -eq 0 ]; then echo "###### CRONTABS OF $user <-----"; echo "$output"; fi ; done
+  register: cronjobs
+
+- name: Checking /etc/crontab
+  shell: >
+    cat /etc/crontab | sed  '/^#/d;/^SHELL/d;/^PATH/d;/^MAILTO/d'
+  register: maincronjob
+
+- name: Create folder if not exists
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Deleting previous local file
+  file:
+    path: "{{ save_path }}/cronjobs_{{ ansible_user }}.txt"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Saving cronjobs to local file
+  lineinfile:
+    path: "{{ save_path }}/cronjobs_{{ ansible_user }}.txt"
+    line: "{{ ansible_default_ipv4['address'] }}  {{ ansible_hostname }}\n{{ cronjobs['stdout'] }}\n{{ maincronjob['stdout'] }}\n------------------------\n\n\n"
+    insertbefore: EOF
+    create: yes
+  delegate_to: localhost

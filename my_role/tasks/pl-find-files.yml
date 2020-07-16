@@ -1,0 +1,71 @@
+
+---
+
+- name: Searching for program's footprints
+  register: find_result
+  find:
+    paths: /
+    file_type: any
+    use_regex: yes
+    recurse: yes
+    hidden: yes
+    #depth: 2
+    patterns:
+      # ANY PATTERN
+#      - '/mesos|marathon|docker|jenkins|nexus|harbor/i'
+#      - '/zabbix|prometheus|grafana/i'
+#      - '/elk|log.*stash|elastic.*search|kibana|kafka/i'
+#      - '/consul/i'
+#      - '/haproxy|nginx/i'
+#      - '/apache|ipa|ldap|zookeeper|sybase/i'
+#      - '/postgres|mysql|cassandra|mongo|nifi|asa.*db|redis/i'
+      # - '/trembita|gitlab|redmine|confluence|jira|sftp|gremlin/i'
+      # - '/metronome|dnsmasq|groovy|beat|/i'
+      # - '/sybase|rabbitmq|Day2Arc|sap.*asa|sap.*iq|php.*fpm|ldap/i'
+
+          
+
+
+
+- set_fact: found_list="{{ find_result['files'] | map(attribute='path') | list }}"   
+
+#- name: Run a script with arguments (free form)
+#  block:
+#    - register: sorted_search
+#      shell: |
+#        /etc/ansible/count_occurences.py "{{ found_list }}"
+#      delegate_to: localhost
+#      ignore_errors: yes
+#      #no_log: true
+
+- name: Create folder if not exist
+  file:
+    path: "{{ save_path_full }}"	
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+
+#- name: Create folder if not exist
+#  file:
+#    path: "{{ save_path }}"
+#    state: directory
+#    mode: '0755'
+#  delegate_to: localhost
+
+
+#- name: Saving search result to folder
+#  local_action: copy force=yes content={{ sorted_search['stdout_lines'] }} dest="{{ save_path }}/{{ ansible_default_ipv4['address'] }}"
+#  ignore_errors: yes
+
+- name: Saving search result to folder
+  local_action: copy force=yes content={{ found_list | to_nice_yaml(indent=2) }} dest="{{ save_path_full }}/{{ ansible_default_ipv4['address'] }}"
+
+
+
+
+
+
+
+
+
+

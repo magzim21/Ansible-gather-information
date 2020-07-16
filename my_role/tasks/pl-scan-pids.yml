@@ -1,0 +1,20 @@
+---
+- name: Executing ps with parameters
+  shell: ps axjfe 
+  register: ps_aux
+
+
+
+
+- name: Create folder if not exists
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true 
+
+
+
+- name: Create file with output for host
+  local_action: copy force=yes content="{{ ps_aux['stdout'] }}\n\n\n" dest="{{ save_path }}/{{ ansible_default_ipv4['address'] }}-{{ ansible_hostname }}.txt"

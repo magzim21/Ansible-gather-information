@@ -1,0 +1,32 @@
+---
+- name: Searching for .bash_history file
+  register: find_results
+  find:
+    paths: 
+      - "/root/"
+      - "/home/"
+    file_type: file
+    # use_regex: yes
+    recurse: yes
+    hidden: yes
+    depth: 2
+    # IS IT REALLY CASE INSENSETIVE ?
+    patterns:
+      - '.bash_history'
+    
+
+- name: Create folder if not exist
+  file:
+    path: "{{ save_path }}/{{ ansible_default_ipv4['address'] }}-{{ ansible_hostname }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  
+- name: ansible copy file from remote to local.
+  fetch:
+    src: "{{ item['path'] }}"
+    dest: "{{ save_path }}/{{ ansible_default_ipv4['address'] }}-{{ ansible_hostname }}/"
+    #flat: yes
+  with_items: "{{ find_results['files']}}" 
+
+

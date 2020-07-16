@@ -1,0 +1,30 @@
+---
+# GET ALL CRONTAB TASKS
+- name: Listing last logins
+  shell: last
+  register: last_output
+
+- name: Create folder if not exists
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Deleting previous local file
+  file:
+    path: "{{ save_path }}/last_{{ ansible_user }}.txt"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Saving cronjobs to local file
+  lineinfile:
+    path: "{{ save_path }}/last_{{ ansible_user }}.txt"
+    line: "{{ ansible_default_ipv4['address'] }}  {{ ansible_hostname }}\n{{ last_output['stdout'] }}\n------------------------\n\n\n"
+    insertbefore: EOF
+    create: yes
+  delegate_to: localhost

@@ -1,0 +1,35 @@
+---
+
+- name: Getting running containers list
+  shell: docker ps
+  register: docker_ps
+
+- name: Gettting existing images list
+  shell: docker images
+  register: docker_images 
+
+- name: Executing docker info
+  shell: docker info
+  register: docker_info
+
+- name: Create folder if not exiss
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true 
+
+- name: Create files with output for host
+  local_action: copy force=yes content="{{ docker_ps['stdout'] }}\n\n\n{{ docker_images['stdout'] }}\n\n\n{{ docker_info['stdout'] }}" dest="{{ save_path }}/{{ ansible_default_ipv4['address'] }}-{{ ansible_hostname }}.txt"
+
+
+- name: Getting information about every single container
+  block:
+    - name: Getting all info about each container
+      shell:  >
+        for container in `docker ps -q`; do printf "\n\n\n########### INSPECT CONTAINER ############"; docker inspect $container; printf "\n\n\n###########  CONTAINER LOGS ############" ; timeout 12s docker logs $container 2>&1 | tail -n 50 || echo "ERROR: retrieving logs from $container took too long" ; done 
+      register: docker_full
+
+    - name: Saving results about every container to a file
+      local_action: copy force=yes content=" {{ docker_full['stdout'] }} \n\n\n " dest="{{ save_path }}/{{ ansible_default_ipv4['address'] }}-{{ ansible_hostname }}-full.txt"

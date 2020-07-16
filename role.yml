@@ -1,0 +1,14 @@
+---
+- name: My Playbook
+  hosts: "{{ hosts_group }}"
+  become: yes
+  vars:
+    - base_dir: "{{ inventory_dir }}/results"
+
+  roles:
+    - my_role
+
+  post_tasks:
+    - debug:
+        msg: SUCCESS!
+

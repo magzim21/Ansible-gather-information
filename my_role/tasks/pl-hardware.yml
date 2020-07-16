@@ -1,0 +1,45 @@
+---
+
+# lscpu | grep -iP '^CPU\(s\)'
+
+- name: Getting cpu quantity
+  shell: lscpu | grep -iP '^CPU\(s\)'
+  register: lscpu_res
+
+- name: Getting total memory 
+  shell: free -g
+  register: memory_res
+
+- name: Getting disks info
+  shell: >
+    df -Th
+  register: disks_res
+
+- name: Checking if internet is available
+  shell: curl google.com --connect-timeout 2 &> /dev/null ; if [ $? -eq 0 ]; then  echo 'Internet is Available' ;else echo 'No Internet'; fi
+  register: internet_res
+
+- name: Create folder if not exists
+  file:
+    path: "{{ save_path }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Deleting previous local file
+  file:
+    path: "{{ save_path }}/hardware_{{ ansible_user }}.txt"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+
+- name: Saving hardware info to local file
+  lineinfile:
+    path: "{{ save_path }}/hardware_{{ ansible_user }}.txt"
+    line: "{{ ansible_default_ipv4['address'] }}  {{ ansible_hostname }}\n{{ lscpu_res['stdout'] }}\n\n{{ memory_res['stdout'] }}\n\n{{ disks_res['stdout'] }}\n\n{{ internet_res['stdout'] }}\n--------------------\n"
+    insertbefore: EOF
+    create: yes
+  delegate_to: localhost
